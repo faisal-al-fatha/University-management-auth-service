@@ -2,8 +2,9 @@
 /* eslint-disable no-unused-vars */
 import cors from 'cors'
 import express, { Application, NextFunction, Request, Response } from 'express'
+import httpStatus from 'http-status'
 import globalErrorHandler from './app/middlewires/globalErrorHandler'
-import { UserRoutes } from './app/modules/users/user.route'
+import routes from './app/routes'
 
 const app: Application = express()
 
@@ -12,7 +13,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 // Application routes
-app.use('/api/v1/users', UserRoutes)
+app.use('/api/v1/', routes)
 
 app.get('/', async (req: Request, res: Response, next: NextFunction) => {
   // Promise.reject(new Error('Unhandeled promise rejection'))
@@ -24,5 +25,18 @@ app.get('/', async (req: Request, res: Response, next: NextFunction) => {
 
 // global error handler
 app.use(globalErrorHandler)
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.status(httpStatus.NOT_FOUND).json({
+    success: false,
+    message: 'Not found',
+    errorMessage: [
+      {
+        path: req.originalUrl,
+        message: 'API not found',
+      },
+    ],
+  })
+})
 
 export default app
